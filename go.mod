@@ -2,4 +2,4 @@ module ascii-player
 
 go 1.22.0
 
-require gocv.io/x/gocv v0.35.0 // indirect
+require gocv.io/x/gocv v0.35.0 // direct
