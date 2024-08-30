@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
+	"github.com/gosuri/uilive"
 	"gocv.io/x/gocv"
 )
 
@@ -15,7 +15,7 @@ func main() {
 		os.Exit(1)
 	}
 	img := gocv.NewMat()
-	window := gocv.NewWindow("Bad Apple")
+	// window := gocv.NewWindow("Bad Apple")
 
 	x := 480
 	y := 360
@@ -25,6 +25,9 @@ func main() {
 
 	blockHeight := y / rows
 	blockWidth := x / cols
+
+	writer := uilive.New()
+	writer.Start()
 
 	for {
 		video.Read(&img)
@@ -36,27 +39,28 @@ func main() {
 		for row := 0; row < rows; row++ {
 			for col := 0; col < cols; col++ {
 				sum := 0
-				for i := blockHeight * row; i < blockHeight * row + blockHeight - 1; i++ {
-					for j := blockWidth * col; j < blockWidth * col + blockWidth - 1; j++ {
+				for i := blockHeight * row; i < blockHeight*row+blockHeight-1; i++ {
+					for j := blockWidth * col; j < blockWidth*col+blockWidth-1; j++ {
 						sum += int(img.GetVecbAt(i, j)[0])
 					}
 				}
 				avg := sum / (blockHeight * blockWidth)
-				if avg > 127 {
-					asciiMat[row][col] = byte(':')
-				} else {
-					asciiMat[row][col] = byte(' ')
-				}
+				intensity := " .:-=+*#%@"
+
+				intensityLen := len(intensity)
+				part := 256 / intensityLen
+				asciiMat[row][col] = intensity[avg / part]
 			}
 		}
 
-		window.IMShow(img)
+		// window.IMShow(img)
 		var str strings.Builder
 		for i := 0; i < rows; i++ {
 			str.WriteString(string(asciiMat[i]))
 			str.WriteString("\n")
 		}
-		fmt.Println(str.String())
+		writer.Flush()
+		fmt.Fprint(writer, str.String())
 		// window.WaitKey(1)
 	}
 }
